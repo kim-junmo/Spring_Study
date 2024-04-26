@@ -1,0 +1,7 @@
+# 자바학습예제에서 제외할 목록
+.classpath
+.project
+.settings/
+bin/
+.tmp.driveupload/
+.metadata
