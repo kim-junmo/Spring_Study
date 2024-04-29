@@ -11,12 +11,13 @@
 	<groupId>com.docmall</groupId>
 	<artifactId>study</artifactId>
 	<version>1.0.0</version>
-	<name>ex00</name>
+	<name>ex01</name>
 	<description>Study Spring Boot</description>
 	<properties>
 		<java.version>17</java.version>
 	</properties>
 	<dependencies>
+		
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
@@ -24,7 +25,7 @@
 		
 		<!-- jsp, jstl를 위한 라이브러리 시작-->
 		<!-- https://docs.sysout.co.kr/web/back-end/spring-boot/spring-controller/add-jsp/spring-boot-3.x -->
-		<dependency>
+		<dependency> <!-- dependency: 의존성 -->
     		<groupId>jakarta.servlet</groupId>
    			<artifactId>jakarta.servlet-api</artifactId>
 		</dependency>
@@ -49,6 +50,13 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
+		</dependency>
+		<!-- 위 코드는 https://mmee2.tistory.com/60 참조-->
+		<!-- 서버의 재시작 없이 변경사항을 반영하고자 하는 목적-->
+		
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-devtools</artifactId>
 		</dependency>
 	</dependencies>
 
