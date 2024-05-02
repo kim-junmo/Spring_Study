@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.docmall.demo.mapper.BoardMapper">
+
+	<insert id="write" parameterType="com.docmall.demo.domain.BoardVO">
+	
+	<!-- regdate, updatedate, viewcount는 기본데이터를 이용하기 때문에 데이터를 넣을 필요가 없음 -->
+		INSERT INTO
+			BOARD(bno, title, content, writer)
+		VALUES <!-- BoardVO에서 GETTER가 #{}에서 작동이 됨 -->
+		(SEQ_BOARD.NEXTVAL, #{title}, #{content}, #{writer} )
+	
+	</insert>
+
+</mapper>

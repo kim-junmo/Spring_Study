@@ -3,7 +3,9 @@
 <mapper namespace="com.docmall.demo.mapper.EmployeesMapper">
 
 <select id="emp_list" resultType="com.docmall.demo.domain.EmployeeVO">
+<!-- resultType은 select 문이였을 때만 사용해야 된다. insert, update, delete 문에서는 사용하지 않는다.-->
 	
+	<![CDATA[
 	SELECT
 		employee_id, 
 		emp_name, 
@@ -18,7 +20,10 @@
 		job_id,
 		create_date, 
 		update_date, 
-		form
-		employee
+	form 
+		employees
+	where
+		ROWNUM <= 10;
+		]]>
 	</select>
 </mapper>
