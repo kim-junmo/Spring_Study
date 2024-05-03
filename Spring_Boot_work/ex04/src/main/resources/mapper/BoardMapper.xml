@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.docmall.demo.mapper.BoardMapper">
+
+	<insert id="write" parameterType="com.docmall.demo.domain.BoardVO">
+	
+	<!-- regdate, updatedate, viewcount는 기본데이터를 이용하기 때문에 데이터를 넣을 필요가 없음 -->
+		INSERT INTO
+			BOARD(bno, title, content, writer)
+		VALUES <!-- BoardVO에서 GETTER가 #{}에서 작동이 됨 -->
+		(SEQ_BOARD.NEXTVAL, #{title}, #{content}, #{writer} )
+	
+	</insert>
+	
+	<!--BoardVO의 list를 먼저 작성하고 난 뒤 id를 일치시키고 resultType의 주소를 일치시킨다. -->
+	<!-- resultType은 select문만 사용이 가능하다. -->
+	<select id="list" resultType="com.docmall.demo.domain.BoardVO">
+	
+	<!-- sql 디벨로퍼의 ;는 여기에서 들어가지 않는다. 들어가면 오류가 발생함. -->
+		SELECT 
+			bno, title, content, writer, regdate, updatedate,  viewcount
+		FROM 
+			board 
+		ORDER BY 
+			bno DESC
+	</select>
+	
+	<update id="readCount" parameterType="Long" >
+	
+		UPDATE
+			board
+		SET
+			viewcount = viewcount + 1
+		WHERE
+			bno = #{bno}
+	
+	</update>
+
+	<select id="get" resultType="com.docmall.demo.domain.BoardVO" parameterType="Long">
+	
+		SELECT 
+			bno, title, content, writer, regdate, updatedate,  viewcount
+		FROM 
+			board 
+		WHERE 
+			bno = #{bno}
+	
+	</select>
+	
+	<update id="modify" parameterType="com.docmall.demo.domain.BoardVO">
+		UPDATE 
+			board
+   		SET 
+   			title = #{title},content = #{content}, updatedate = sysdate
+		WHERE 
+			bno = #{bno}
+	</update>
+	
+	<delete id="delete" parameterType="Long">
+	
+	DELETE FROM
+		board
+	WHERE
+		bno = #{bno}
+	
+	
+	</delete>
+
+	
+</mapper>

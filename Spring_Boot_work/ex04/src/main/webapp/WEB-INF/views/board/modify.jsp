@@ -1,5 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
+
+<!-- jsp 태그 라이브러리 -->
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+    
 <!DOCTYPE html>
 <html>
 <head>
@@ -24,25 +28,29 @@
         <div class="col-12">
             <div class="card card-primary">
                 <div class="card-header">
-                <h3>글쓰기 폼</h3>
+                <h3>글수정 폼</h3>
                 </div>
-                <form action="/board/write" method="post">
+                <form action="/board/modify" method="post">
                 <div class="card-body">
                 <div class="form-group">
+                <label for="title">Bno</label>
+                <input type="text" class="form-control" id="bno" name="bno" value="${boardVO.bno }" readonly>
+                </div>
+                <div class="form-group">
                 <label for="title">title</label>
-                <input type="text" class="form-control" id="title" name="title" placeholder="Enter title">
+                <input type="text" class="form-control" id="title" name="title" placeholder="Enter title" value="${boardVO.title }">
                 </div>
                 <div class="form-group">
                     <label>content</label>
-                <textarea class="form-control" rows="3" id="content" name="content" placeholder="Enter content"></textarea>
+                <textarea class="form-control" rows="3" id="content" name="content" placeholder="Enter content">${boardVO.content }</textarea>
                 </div>
                     <div class="form-group">
                     <label for="writer">write</label>
-                    <input type="text" class="form-control" id="writer" name="writer" placeholder="Enter title">
+                    <input type="text" class="form-control" id="writer" name="writer" placeholder="Enter title" value="${boardVO.writer }">
                 </div>
                 
                 <div class="card-footer">
-                <button type="submit" class="btn btn-primary">Submit</button>
+				<button type="submit" class="btn btn-primary">Modify</button>
                 </div>
                 </form>
                 </div>

@@ -2,6 +2,7 @@ package com.docmall.demo.domain;
 
 import java.util.Date;
 
+//테이블의 컬럼을 소문자로 만들어 주석을 걸어 사용하기!
 //bno, title, content, writer, regdate, updatedate, viewcount
 
 public class BoardVO {
