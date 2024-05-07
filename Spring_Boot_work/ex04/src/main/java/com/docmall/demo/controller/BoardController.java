@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.docmall.demo.domain.BoardVO;
+import com.docmall.demo.dto.Criteria;
+import com.docmall.demo.dto.pageDTO;
 import com.docmall.demo.service.BoardService;
 
 @RequestMapping("/board")
@@ -47,7 +49,7 @@ public class BoardController {
 		
 	}
 	
-	//글 목록
+	/*글 목록
 	@GetMapping("list")
 	public void list(Model model) {
 		
@@ -57,7 +59,31 @@ public class BoardController {
 		model.addAttribute("list", list);
 		
 		logger.info("리스트");
+	}*/
+	
+	//글 목록
+	@GetMapping("list")
+	public void list(Criteria cri, Model model) {
+		
+		//데이터소스(list)를 jsp에서 사용할 경우에는 파라미터를 Model을 사용한다.
+		
+		List<BoardVO> list = boardService.listwithPaging(cri);
+		
+		logger.info("게시물 목록 데이터: " + list);
+		
+		//1)게시물 목록 10건
+		model.addAttribute("list", list);
+		
+		int total = boardService.getTotalCount();
+		pageDTO pageDTO = new pageDTO(cri, total);
+		
+		logger.info("페이징 기능 데이터: " + pageDTO);
+		
+		//2)페이징 기능 : 1	 2	3	4	5	6	7	8	9	10 [다음]
+		model.addAttribute("pageMaker", pageDTO);
+		
 	}
+	
 	
 	//게시물조회, 게시물 수정
 	@GetMapping(value = {"get","modify"})

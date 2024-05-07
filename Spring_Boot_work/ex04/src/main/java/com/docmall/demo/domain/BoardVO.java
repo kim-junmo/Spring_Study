@@ -2,8 +2,15 @@ package com.docmall.demo.domain;
 
 import java.util.Date;
 
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
 //bno, title, content, writer, regdate, updatedate, viewcount
 
+@Getter
+@Setter
+@ToString
 public class BoardVO {
 
 	private Long bno; //참조타입의 long 클래스를 사용했기 때문에 Long을 사용해야 됨. Wrapper클래스
@@ -14,6 +21,7 @@ public class BoardVO {
 	private Date updatedate;
 	private int viewcount;
 	
+	/*
 	public Long getBno() {
 		return bno;
 	}
@@ -75,6 +83,6 @@ public class BoardVO {
 		return "BoardVO [bno=" + bno + ", title=" + title + ", content=" + content + ", writer=" + writer + ", regdate="
 				+ regdate + ", updatedate=" + updatedate + ", viewcount=" + viewcount + "]";
 	}
-	
+	*/
 	
 }
