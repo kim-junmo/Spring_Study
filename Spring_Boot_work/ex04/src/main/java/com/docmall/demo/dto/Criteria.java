@@ -16,7 +16,7 @@ public class Criteria {
 	
 	//검색용도
 	//type: 선택한 검색종류(제목만, 게시글, 게시글 + 댓글, 글작성자 등)
-	private String type;
+	private String type; //검색종류 1.제목(T) 2.내용(C) 3.작성자(W) 4.제목 or 내용(TC) 5.제목 or 작성자(TW) 6.제목 or 작성자 or 내용(TWC) 
 	private String keyword;
 	//keyword: 박스에 검색한 검색어가 저장이 된다.
 	
@@ -32,4 +32,14 @@ public class Criteria {
 		
 		System.out.println("pageNum: " + pageNum + ", amount " + amount);
 	}
+
+	//아래 메서드명은 getter메서드 이름 규칙대로 작성해야 한다. get(접두사) + typeArr(필드) = getTypeArr 메서드명
+	//클라이언트로부터 검색정보가 (제목 또는 작성자 또는 내용)으로 선택되어 지면 type필드 TWC 제목 또는 작성자 또는 내용
+	//type.split("")이 사용이 되면 "TWC".split("")이 되고 "T" "W" "C"의 배열 구조가 됨. 
+	//
+	public String[] getTypeArr() {
+		return type == null ? new String[] {} : type.split("");
+	}
 }
+
+

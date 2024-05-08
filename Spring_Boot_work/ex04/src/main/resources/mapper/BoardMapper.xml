@@ -25,8 +25,35 @@
 			bno DESC
 	</select>
 	
+	<!-- 
+	검색조건 1)목록 2) 총데이터 개수 공통사항으로 사용될 때 복합적으로 사용이 필요할때는 sql로 사용해야 한다. 
+	foreach : 검색 조건에 or이 붙어있는 3개 때문에 사용되어야 한다. 반복을 하는 역활이 필요하기 때문.
+	검색정보가 (제목 또는 작성자 또는 내용)으로 선택, "T" "W" "C"
+	-->
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND" prefixOverrides="OR">
+			<foreach collection="typeArr" item="type"> <!--typeArr는 Criteria 클래스의 getTypeArr을 참조한다.  -->
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+							title like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'W'.toString()">
+							writer like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+							content like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>		
+		</trim>
+	</sql>
+	
+		
+	<!-- 공통사항: 검색조건 추가 -->
 	<select id="listwithPaging" resultType="com.docmall.demo.domain.BoardVO" parameterType="com.docmall.demo.dto.Criteria">
-		<![CDATA[
+		
 		SELECT 
 			bno, title, content, writer, regdate, updatedate,  viewcount
 		FROM (
@@ -35,20 +62,29 @@
     			FROM 
         			board
     			WHERE 
-    				ROWNUM <= (#{pageNum} * #{amount})  --페이지 번호 * 페이지별 출력건수
+    		
+    				<include refid="criteria"></include>
+    				    				
+    		<![CDATA[	
+    			ROWNUM <= (#{pageNum} * #{amount})
+    		]]>		
+    				
 		)
 		WHERE 
 			RN > (#{pageNum} - 1) * #{amount}
-		]]>
+		
 	</select>
 	
+	<!-- 공통사항: 검색조건 추가 -->
 	<select id="getTotalCount" resultType="int">
 	
 		SELECT
 			COUNT(*)
 		FROM
 			board
-	
+		WHERE
+			<include refid="criteria"></include>
+		bno > 0
 	</select>
 	
 	<update id="readCount" parameterType="Long" >

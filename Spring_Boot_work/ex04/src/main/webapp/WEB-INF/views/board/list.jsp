@@ -46,7 +46,7 @@
                     <c:forEach items="${list }" var="boardVO">
                     <tr>
                         <td>${boardVO.bno }</td>
-                        <td><a href="/board/get?bno=${boardVO.bno }">${boardVO.title }</a></td>
+                        <td><a href="/board/get?bno=${boardVO.bno }&type=${pageMaker.cri.type}&keyword=${pageMaker.cri.keyword}&pageNum=${pageMaker.cri.pageNum}&amount=${pageMaker.cri.amount}">${boardVO.title }</a></td>
                         <td>${boardVO.writer }</td>                
                         <td>
                         <fmt:formatDate value="${boardVO.regdate }" pattern="yyyy-MM-dd" /></td>
@@ -60,21 +60,44 @@
                 <!-- 
                 			1	2	3	4	5	6	7	8	9	10	[다음]
                 	[이전]	11	12	13	14	15	16	17	18	19	20	[다음]
-                 -->
+                -->
                 
                 <div class="card-footer clearfix">
+                    <div class="float-left">
+                        <form id="searchForm" action="/board/list" method="get">
+                            <div class="form-group">
+                               <select name="type" > 
+                                    <option value="" <c:out value="${pageMaker.cri.type == null ? 'selected' : ''}" />>----</option>
+                                    <option value="T" <c:out value="${pageMaker.cri.type == 'T' ? 'selected' : ''}" />>제목</option>
+                                    <option value="C" <c:out value="${pageMaker.cri.type == 'C' ? 'selected' : ''}" />>내용</option>
+                                    <option value="W" <c:out value="${pageMaker.cri.type == 'W' ? 'selected' : ''}" />>작성자</option>
+                                    <option value="TC" <c:out value="${pageMaker.cri.type == 'TC' ? 'selected' : ''}" />>제목 or 내용</option>
+                                    <option value="TW" <c:out value="${pageMaker.cri.type == 'TW' ? 'selected' : ''}" />>제목 or 작성자</option>
+                                    <option value="TWC" <c:out value="${pageMaker.cri.type == 'TWC' ? 'selected' : ''}" />>제목 or 작성자 or 내용</option>
+                                </select>
+                                <input type="text" name="keyword" placeholder="검색어를 입력하세요" value="${pageMaker.cri.keyword }">
+                                <input type="hidden" name="pageNum" value="1">
+                                <input type="hidden" name="amount" value="${pageMaker.cri.amount}">
+                                <input type="submit" class="btn btn-primary btn-sm" value="search">
+                            </div>
+                        </form>
+                    </div>
 	                <ul class="pagination pagination-sm m-0 float-right">
 	                	<c:if test="${pageMaker.prev }">
-	                		<li class="page-item"><a class="page-link" href="/board/list?pageNum=${pageMaker.startPage-1 }&amount=${pageMaker.cri.amount}">이전</a></li>
+	                		<li class="page-item"><a class="page-link" href="/board/list?type=${pageMaker.cri.type }&keyword=${pageMaker.cri.keyword }&pageNum=${pageMaker.startPage-1 }&amount=${pageMaker.cri.amount}">이전</a></li>
 	                	</c:if>
 	                	
 		                <c:forEach begin="${pageMaker.startPage }" end="${pageMaker.endPage }" var="page">
 		                <li class='page-item ${pageMaker.cri.pageNum == page?"active" : ""}'>
-		                <a class="page-link" href="/board/list?pageNum=${page }&amount=${pageMaker.cri.amount}">${page }</a></li>
+		                <!-- 
+		                /board/list 매핑 주소 요청 시 스프링에서 메서드와 파라미터가 Criteria cri로 되어 있기 때문에
+		                클라이언트에서 pageNum, amount 두 파라미터로 정보를 보내야 한다.
+		                -->
+		                <a class="page-link" href="/board/list?type=${pageMaker.cri.type }&keyword=${pageMaker.cri.keyword }&pageNum=${page }&amount=${pageMaker.cri.amount}">${page }</a></li>
 		                </c:forEach>
 		                
 		                <c:if test="${pageMaker.next }">
-	                		<li class="page-item"><a class="page-link" href="/board/list?pageNum=${pageMaker.endPage+1 }&amount=${pageMaker.cri.amount}">다음</a></li>
+	                		<li class="page-item"><a class="page-link" href="/board/list?type=${pageMaker.cri.type }&keyword=${pageMaker.cri.keyword }&pageNum=${pageMaker.endPage+1 }&amount=${pageMaker.cri.amount}">다음</a></li>
 	                	</c:if>
              	    </ul>
                 </div>

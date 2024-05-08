@@ -7,6 +7,11 @@ import lombok.ToString;
 @ToString
 public class pageDTO {
 
+	/*
+	 		1	2	3	4	5	6	7	8	9	10	[다음]	<--첫번째 블럭
+	 [이전]	11	12	13	14	15	16	17	18	19	20	[다음]	<--두번째 블럭
+	 */
+	
 	//startPage: 페이지 넘기는 블럭에 가장 처음 값, 1 or 11 or 21....
 	private int startPage; //각 블럭에서 출력할 시작페이지 번호
 	private int endPage;   //각 블럭에서 출력할 끝페이지 번호
@@ -43,6 +48,8 @@ public class pageDTO {
 		//endPage값이 동일하게 공식을 처리하는 것이 목적이다. 
 		//즉 블럭에 1부터 10까지를 눌러도 10까지만 보이는 것임.
 		
+		//1 	2 	 3 	4 	5 6  7  8  9  10
+		//11 	12	 13 14 15 16 17 18 19 20
 		//아래 구문은 endPage의 값이 10, 20, 30 ...으로 고정이 되어 있음.
 		this.endPage = (int) (Math.ceil(cri.getPageNum() / (double) pageSize)) * pageSize; 
 		
