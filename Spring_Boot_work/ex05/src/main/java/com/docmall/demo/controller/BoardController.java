@@ -21,8 +21,8 @@ import com.docmall.demo.service.BoardService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j //로그객체 지원
-@RequestMapping("/board")
-@Controller
+@RequestMapping("/board") //jsp(view) 파일을 관리하기 위한 board폴더 생성
+@Controller //jsp파일이 필요하기 때문에 (웹페이지를 만들어야 해서) Controller를 사용해야함.
 public class BoardController {
 
 	
@@ -31,7 +31,7 @@ public class BoardController {
 
 	//insert, delect, update는 String으로 한다.
 	
-	//의존성 주입
+	//의존성 주입 : 필드주입방식
 	@Autowired
 	private BoardService boardService;
 	

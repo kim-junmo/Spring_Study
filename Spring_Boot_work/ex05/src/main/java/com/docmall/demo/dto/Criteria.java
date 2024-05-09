@@ -1,7 +1,5 @@
 package com.docmall.demo.dto;
 
-
-
 import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.Getter;

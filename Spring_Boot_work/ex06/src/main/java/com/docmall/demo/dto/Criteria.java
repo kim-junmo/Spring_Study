@@ -1,7 +1,5 @@
 package com.docmall.demo.dto;
 
-
-
 import org.springframework.web.util.UriComponentsBuilder;
 
 import lombok.Getter;
@@ -54,7 +52,7 @@ public class Criteria {
 				.queryParam("type", this.type)
 				.queryParam("keyword", this.keyword);
 		
-		return builder.toUriString();
+		return builder.toString();
 				
 	}
 }
