@@ -7,17 +7,63 @@
 <head>
 <meta charset="UTF-8">
 <title>Insert title here</title>
+<style>
+    table, th, td {
+        border: 1px solid;
+    }
+    
+    table {
+        width: 70%;
+    }
+</style>
+
 <!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
 
 <!-- jQuery library -->
-<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>
+<!--<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.slim.min.js"></script>-->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
 
 <!-- Popper JS -->
 <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.1/dist/umd/popper.min.js"></script>
 
 <!-- Latest compiled JavaScript -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- 1) Include Handlebars from a CDN -->
+<script src="https://cdn.jsdelivr.net/npm/handlebars@latest/dist/handlebars.js"></script>
+
+<!-- 2) Handlebar Trmplate -->
+<script id="reply-template" type="text/x-handlebars-template">
+    <table>
+        {{#each .}} <!--데이터가 복수이면 each를 사용한다.-->
+        <tr>
+            <td>[{{rno}}] {{replyer}} {{converDate replydate}}</td>
+        </tr>
+        <tr>
+            <td>{{retext}}</td>
+        </tr>
+        <tr>
+            <td>
+                <button type="button" class="btn btn-primary btn-sm">답변</button>
+                <button type="button" class="btn btn-primary btn-sm">수정</button>
+                <button type="button" class="btn btn-danger btn-sm">삭제</button>
+            </td>
+        </tr>
+        {{/each}}
+    </table>
+</script>
+
+<script>
+//handlebar Template메서 사용할 사용자 정의 함수 작업
+    Handlebars.registerHelper("converDate", function(replydate){
+    const date = new Date(replydate);
+    
+    let month = (date.getMonth()+1 < 10 ? "0" + (date.getMonth()+1) : date.getMonth()+1);
+    let day = (date.getDate() < 10 ? "0" + (date.getDate()) : date.getDate());
+    return date.getFullYear() + "/" + month + "/" + day;
+})
+</script>
 
 </head>
 <body>
@@ -75,6 +121,14 @@
             </div>
         </div>
     </div>
+    <div class="row">
+        <div class="col">
+            <!-- 댓글목록 위치-->
+            <div id = "replyList"></div>
+            <!-- 댓글페이지 위치 -->
+            <div id = "replyPager"></div>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -102,6 +156,141 @@
         actionForm.submit();
     }
     
+    //JQuery 작업을 하기 위한 기본.
+    //ready()이벤트 메서드. 브라우저가 모든 웹페이지의 내용을 읽고 시작되는 이벤트
+    $(document).ready(function() {
+
+        /*
+        댓글페이지번호 클릭이벤트 : $("nave ul li a").on("이벤트명", function() {
+        아래 선택자에 참조되는 태그가 동적으로 생성된 경우에는 이벤트 설정 불가(엄청 중요)
+        $("nave ul li a").on("click", function() {
+        })
+        동적태그로 이벤트를 설정하는 경우 1. 정적태그를 먼저 찾는다.
+        $("정적태그 선택자").on("이벤트명", "동적태그 선택자", function() {
+        })
+    */
+        //동적태그로 이벤트를 설정하는 경우
+        //블럭 1    2   3   4   5   6   7   8   9   10 [다음] 
+        //버튼을 누를 때 마다 해당 코드가 작동하게 됨. 페이지 번호 값만 변경이 되고 url은 고정.
+        //즉, replyPage만 달라짐.
+        $("div#replyPager").on("click", "li a", function(e) {
+            e.preventDefault(); //a태그의 herf속성의 링크기능 없애기.
+            //클릭했던 a 태그를 참조한다.
+            replyPage = $(this).attr("href");
+
+            //console.log("페이지", replyPage);
+            
+            url = "/replies/pages/" + bno + "/" + replyPage;
+            getPage(url);
+        });
+
+
+    });
+
+
+    //게시물 글번호 확보
+    let bno = ${boardVO.bno }; //게시물 번호 511
+    let replyPage = 1; //댓글 목록중 1번째 페이지/
+
+    //let url = "댓글 목록과 댓글 페이지 정보를 요청하는 메핑 주소";
+    let url = "/replies/pages/" + bno + "/" + replyPage;
+
+    // console.log("url", url); 콘솔 확인 용, 코딩할 때 확인 후 다음과정으로 넘어가야한다.
+
+    getPage(url);
+    //댓글 목록 함수
+    function getPage(url) {
+
+        //$.getJSON: ajax 기능을 지원.
+        $.getJSON(url, function(data) {
+            //replyController의 데이터 이름으로 data.list, data.pageMaker이 
+            //function(data)로 데이터가 삽입된다.
+            // console.log("list", data.list);
+            // console.log("pageMaker", data.pageMaker);
+            /*
+            let result = "";
+            for(let i=0; i<data.list.length; i++) {
+                result += "댓글번호; " + data.list[i].rno + "<br>";
+                result += "댓글내용; " + data.list[i].retext + "<br>";
+            }
+
+            $("#replyList").html(result);  //#replyList : CSS 선택자
+            */
+            displayReplyData(data.list, $("#replyList"), $("#reply-template"));
+            displayReplyPaging(data.pageMaker, $("#replyPager"));
+            /*
+            data.list : replyData참조
+            $("#replyList") : target참조
+            $("#reply-template") : template참조
+            */
+        });
+    }
+    /*
+    댓글목록 데이터 바인딩
+    replyData : 댓글목록데이터, 
+    target : 댓글목록 출력될 태그위치
+    template : 댓글 목록 UI 핸들바 탬플릿
+    */
+    function displayReplyData(replyData, target, template) {
+        let templateObj = Handlebars.compile(template.html());
+        let replyHtml = templateObj(replyData);
+
+        console.log("댓글목록: ", replyHtml);
+
+        target.empty(); // target변수가 참조하는 태그위치에 내용을 지운다.
+        target.append(replyHtml); // target변수가 참조하는 태그위치에 자식레벨로 replyHtml변수의 내용을 추가한다.
+
+    }
+
+
+
+    //댓글 페이징 작업
+    //pageData: 페이징에 필요한 데이터
+    //target : 페이징 기능이 삽입된 데이터
+    function displayReplyPaging(pageData, target) {
+        
+        /*
+        <nav aria-label="Page navigation example">
+            <ul class="pagination">
+                <li class="page-item"><a class="page-link" href="#">Previous</a></li>
+                <li class="page-item"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item"><a class="page-link" href="#">Next</a></li>
+            </ul>
+        </nav>
+        */
+        
+        let pageStr = '<nav aria-label="Page navigation example">';
+            pageStr += '<ul class="pagination">';
+
+        //이전표시여부 작업
+        if(pageData.prev) {
+            pageStr += '<li class="page-item">';
+            pageStr += '<a class="page-link" href="' + (pageData.startPage - 1) + '">Prev</a></li>';
+        }
+        
+        //기본 페이지 번호 작업
+        for(let i=pageData.startPage; i <= pageData.endPage; i++) {
+            let curPageClass = (pageData.cri.pageNum == i) ? 'active' : '';
+            pageStr += '<li class="page-item ' + curPageClass + '">';
+            pageStr += '<a class="page-link" href="' + i + '">' + i + '</a></li>';
+        }
+
+
+        //다음 표시여부 작업
+        if(pageData.next) {
+            pageStr += '<li class="page-item">';
+            pageStr += '<a class="page-link" href="' + (pageData.endPage + 1) + '">Next</a></li>';
+        }
+
+        pageStr += '</ul></nav>';
+        
+
+        //target변수가 참조하는 태그내용에 pageStr변수의 값을 대입(삽입)
+        target.html(pageStr);
+    }
+
 </script>
 </body>
 </html>
