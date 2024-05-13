@@ -14,6 +14,7 @@
     
     table {
         width: 70%;
+        border-collapse: collapse;
     }
 </style>
 
@@ -35,19 +36,18 @@
 
 <!-- 2) Handlebar Trmplate -->
 <script id="reply-template" type="text/x-handlebars-template">
-    <table>
+    <table id="replytable">
         {{#each .}} <!--데이터가 복수이면 each를 사용한다.-->
         <tr>
-            <td>[{{rno}}] {{replyer}} {{converDate replydate}}</td>
+            <td>[<span id="rno_{{rno}}">{{rno}}</span>] <span id="replyer_{{rno}}">{{replyer}}</span> {{convertDate replydate}}</td>
         </tr>
         <tr>
-            <td>{{retext}}</td>
+            <td><span id="retext_{{rno}}">{{retext}}</span></td>
         </tr>
         <tr>
             <td>
-                <button type="button" class="btn btn-primary btn-sm">답변</button>
-                <button type="button" class="btn btn-primary btn-sm">수정</button>
-                <button type="button" class="btn btn-danger btn-sm">삭제</button>
+                <button type="button" name="btnReplyModify" data-rno="{{rno}}" class="btn btn-primary btn-sm">수정</button>
+                <button type="button" name="btnReplyDelete" class="btn btn-danger btn-sm">삭제</button>
             </td>
         </tr>
         {{/each}}
@@ -56,7 +56,7 @@
 
 <script>
 //handlebar Template메서 사용할 사용자 정의 함수 작업
-    Handlebars.registerHelper("converDate", function(replydate){
+    Handlebars.registerHelper("convertDate", function(replydate) {
     const date = new Date(replydate);
     
     let month = (date.getMonth()+1 < 10 ? "0" + (date.getMonth()+1) : date.getMonth()+1);
@@ -123,6 +123,10 @@
     </div>
     <div class="row">
         <div class="col">
+            <!-- Button trigger modal -->
+            <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" id="btnReplyWrite">
+                댓글쓰기
+            </button>
             <!-- 댓글목록 위치-->
             <div id = "replyList"></div>
             <!-- 댓글페이지 위치 -->
@@ -184,6 +188,123 @@
             getPage(url);
         });
 
+        //댓글쓰기 대화상자 버튼 클릭. document.getElementById("btnReplyWrite")의 기능과 유사하다.
+        //$("댓글쓰기 버튼 태그를 참조하는 선택자"), 아이디를 참조할 땐 #을 사용한다.
+        $("#btnReplyWrite").on("click", function() {
+            // console.log("댓글 버튼 클릭");
+
+            $("#replyDialog").modal('show');
+        });
+
+        //1)모달 대화상자 댓글 등록
+        $("#btnModalReplySave").on("click", function() {
+            // console.log("댓글등록 버튼 클릭");
+            //$("#replyer").val(): <input type='text' id=replyer> 태그의 value값
+            //$("#replyer").val(): 댓글 작성자, 내용 읽어오기
+            let replyer = $("#replyer").val();
+            let retext = $("#retext").val();
+
+            //댓글 데이터를 json포맷으로 서버에 전송.
+            // let replyData = {bno: ${boardVO.bno}, replyer}
+            //1) 댓글등록데이터를 자바스크립트의 object문법으로 표현
+            let replyData = {bno: ${boardVO.bno}, replyer: replyer, retext: retext};
+
+            //2) 댓글데이터를 JSON으로 변환하여 서버에 전송
+            // console.log(JSON.stringify(replyData));
+
+            // return;
+
+            $.ajax({
+                type: 'post',
+                url : '/replies/new',
+                headers : {
+                    "Content-Type" : "application/json", "X-HTTP-Method-Override" : "POST"
+                },
+                dataType: 'text', //스프링 주소의 메서드 리턴타입
+                data: JSON.stringify(replyData), //서버로 전송할 json데이터
+                success: function(data) {
+                    if(data == "success") {
+                        alert("댓글 등록됨");
+                        let url = "/replies/pages/" + bno + "/" + replyPage;
+                        // console.log("url", url); 콘솔 확인 용, 코딩할 때 확인 후 다음과정으로 넘어가야한다.
+                        getPage(url);
+
+                        //댓글 작성자, 내용 초기화
+                        $("#replyer").val("");
+                        $("#retext").val("");
+
+                        //modal dialog 화면에서 사라짐.
+                        $("#replyDialog").modal('hide');
+                    }
+                }
+            });
+        });
+
+        //2)모달 대화상자 댓글 수정
+        $("#btnModalReplyUpdate").on("click", function() {
+            let replyer = $("#replyer").val();
+            let retext = $("#retext").val();
+
+            //댓글 데이터를 json포맷으로 서버에 전송.
+            //1) 댓글수정데이터를 자바스크립트의 object문법으로 표현
+            let replyData = {rno: $("#reply_rno").html(), replyer: replyer, retext: retext};
+
+            //2) 댓글데이터를 JSON으로 변환하여 서버에 전송
+            // console.log(JSON.stringify(replyData));
+
+            // return;
+
+            $.ajax({
+                type: 'put', //댓글 수정 작업은 rest API에서는 put, patch요청방식 사용.
+                url : '/replies/modify',
+                headers : {
+                    "Content-Type" : "application/json", "X-HTTP-Method-Override" : "PUT"
+                },
+                dataType: 'text', //스프링 주소의 메서드 리턴타입
+                data: JSON.stringify(replyData), //서버로 전송할 json데이터
+                success: function(data) {
+                    if(data == "success") {
+                        alert("댓글 수정됨");
+                        let url = "/replies/pages/" + rno + "/" + replyPage;
+                        // console.log("url", url); 콘솔 확인 용, 코딩할 때 확인 후 다음과정으로 넘어가야한다.
+                        getPage(url);
+
+                        //댓글 번호, 댓글 작성자, 내용 초기화
+                        $("#reply_rno").html(""); // ("") 공백으로 초기화
+                        $("#replyer").val(""); // ("") 공백으로 초기화
+                        $("#retext").val(""); // ("") 공백으로 초기화
+
+                        //modal dialog 화면에서 사라짐.
+                        $("#replyDialog").modal('hide');
+                    }
+                }
+            });
+        });
+
+
+        //댓글 목록에서 수정버튼을 클릭시 $("정적태그선택자").on("이벤트명", "동적태그선택자", function()) {
+        $("div#replyList").on("click", "button[name='btnReplyModify']", function() {
+            // console.log("수정버튼을 클릭");
+            //$(this)는 클릭한 수정버튼을 관리, 
+            //parents("table#replytable") : 조상들중 table#replytable 선택자에 해당하는 태그
+            //$(this).parents() : <td>태그;
+            //$(this).parents().parents(); : <tr>태그; 참조
+            let rno = $(this).data("rno"); //<button data-rno="500">수정</button>
+            let replyer = $(this).parents("table#replytable").find("#replyer_" + rno).html();
+            let retext = $(this).parents("table#replytable").find("#retext_" + rno).html();
+
+            // console.log("rno", rno);
+            // console.log("replyer", replyer);
+            // console.log("retext", retext);
+
+            //모달 대화상자에 값을 삽입(출력)하는 작업.
+            $("#reply_rno").html(rno); //일반태그인 <span> 태그이기 때문에 html을 사용
+            //<input>태그는 val
+            $("#replyer").val(replyer); 
+            $("#retext").val(retext);
+
+            $("#replyDialog").modal('show');
+        });
 
     });
 
@@ -235,7 +356,7 @@
         let templateObj = Handlebars.compile(template.html());
         let replyHtml = templateObj(replyData);
 
-        console.log("댓글목록: ", replyHtml);
+        //console.log("댓글목록: ", replyHtml);
 
         target.empty(); // target변수가 참조하는 태그위치에 내용을 지운다.
         target.append(replyHtml); // target변수가 참조하는 태그위치에 자식레벨로 replyHtml변수의 내용을 추가한다.
@@ -262,35 +383,68 @@
         */
         
         let pageStr = '<nav aria-label="Page navigation example">';
-            pageStr += '<ul class="pagination">';
+        pageStr += '<ul class="pagination">';
 
-        //이전표시여부 작업
-        if(pageData.prev) {
-            pageStr += '<li class="page-item">';
-            pageStr += '<a class="page-link" href="' + (pageData.startPage - 1) + '">Prev</a></li>';
-        }
-        
-        //기본 페이지 번호 작업
-        for(let i=pageData.startPage; i <= pageData.endPage; i++) {
-            let curPageClass = (pageData.cri.pageNum == i) ? 'active' : '';
-            pageStr += '<li class="page-item ' + curPageClass + '">';
-            pageStr += '<a class="page-link" href="' + i + '">' + i + '</a></li>';
-        }
-
-
-        //다음 표시여부 작업
-        if(pageData.next) {
-            pageStr += '<li class="page-item">';
-            pageStr += '<a class="page-link" href="' + (pageData.endPage + 1) + '">Next</a></li>';
-        }
-
-        pageStr += '</ul></nav>';
-        
-
-        //target변수가 참조하는 태그내용에 pageStr변수의 값을 대입(삽입)
-        target.html(pageStr);
+    //이전표시여부 작업
+    if(pageData.prev) {
+        pageStr += '<li class="page-item">';
+        pageStr += '<a class="page-link" href="' + (pageData.startPage - 1) + '">Previous</a></li>';
     }
 
+    // 페이지번호 작업
+    for(let i = pageData.startPage; i <= pageData.endPage; i++) {
+        let curPageClass = (pageData.cri.pageNum == i) ? 'active' : '';
+        pageStr += '<li class="page-item ' + curPageClass + '">';
+        pageStr += '<a class="page-link" href="' + i + '">' + i + '</a></li>';
+    }
+
+    //다음표시여부 작업
+    if(pageData.next) {
+        pageStr += '<li class="page-item">';
+        pageStr += '<a class="page-link" href="' + (pageData.endPage + 1) + '">Next</a></li>';
+    }
+
+    pageStr += '</ul></nav>';
+
+    //target변수가 참조하는 태그내용에 pageStr변수의 값을 삽입(대입)
+    target.html(pageStr);
+}
 </script>
+
+
+
+<!-- Modal -->
+<div class="modal fade" id="replyDialog" data-backdrop="static" data-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="staticBackdropLabel">댓글 <span id="reply_rno"></span></h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+
+   			<div class="modal-body">
+        		<div class="form-group">
+            	<label for="replyer">replyer</label>
+            	<input type="text" class="form-control" id="replyer" placeholder="Enter writer...">
+          	</div>
+          
+        	<div class="form-group">
+            	<label for="retext">retext</label>
+            	<textarea class="form-control" id="retext" rows="3"></textarea>
+        	</div>
+    		</div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="btnModalReplySave">등록</button>
+                <button type="button" class="btn btn-primary" id="btnModalReplyUpdate">수정</button>
+                <button type="button" class="btn btn-primary" id="btnModalReplyDelete">삭제</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 </body>
 </html>

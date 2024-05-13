@@ -4,12 +4,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.ibatis.annotations.Delete;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,6 +28,7 @@ import lombok.extern.slf4j.Slf4j;
 
 //댓글 기능과 관련된 매핑주소를 관리하는 클래스
 //게시판의 get.jsp에서 작업에 필요한 내용.
+//rest API 개발 방법으로 작업
 
 //jsp가 필요없기 때문에 어노테이션은 restController를 사용함.
 //웹페이지가 기존 Board로 만들어져있기 때문에 필요없다. 
@@ -61,5 +67,38 @@ public class ReplyController {
 		return entity;
 	}
 	
+	//댓글 저장
+	//consumes = "application/json" : 클라이언트에서 보내는 데이터는 json이어야 한다.
+	//produces = {MediaType.TEXT_PLAIN_VALUE} : 서버에서 클라이언트로 보내는 응답데이터 text이다.
+	//ResponseEntity<String> : 서버로 보내는 응답데이터가 text이기 때문에 String이다. 
+	//String이기 때문에 get.jsp 중에 dateType는 text이며 data는 json으로 받아야 된다. 
+	//@RequestBody : json데이터를 ReplyVO로 변환해주는 기능.jackson-databind 라이브러리가 실제 json관련 작업을 함.
+	@PostMapping(value = "/new", consumes = "application/json", produces = {MediaType.TEXT_PLAIN_VALUE})
+	public ResponseEntity<String> create(@RequestBody ReplyVO vo) {
+		ResponseEntity<String> entity = null;
+		
+		log.info("댓글데이터" + vo);
+		
+		replyService.insert(vo);
+		
+		entity = new ResponseEntity<String>("success", HttpStatus.OK);
+		
+		return entity;
+	}
 
+	//댓글 수정을 put or patch
+	@PutMapping(value = "/modify", consumes = "application/json", produces = {MediaType.TEXT_PLAIN_VALUE})
+	public ResponseEntity<String> Modify(@RequestBody ReplyVO vo) {
+		ResponseEntity<String> entity = null;
+		
+		log.info("댓글수정데이터" + vo);
+		
+		//댓글 수정작업
+		replyService.update(vo);
+		
+		entity = new ResponseEntity<String>("success", HttpStatus.OK);
+		
+		
+		return entity;
+	}
 }

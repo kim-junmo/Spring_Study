@@ -19,6 +19,10 @@ public interface ReplyMapper {
 	
 	//댓글페이징 작업을 위한 전체 목록 작업
 	int getCountByBno(Long bno);
+	
+	void insert(ReplyVO vo);
+	
+	void update(ReplyVO vo);
 }
 
 
