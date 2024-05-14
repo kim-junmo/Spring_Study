@@ -100,5 +100,21 @@ public class ReplyController {
 		
 		
 		return entity;
+		
+	
+	}
+	
+	//댓글 삭제 delete 일반적인 주소(/delete?rno=댓글번호) X rest API 경로형태 주소(/delete/500)
+	@DeleteMapping(value = "/delete/{rno}", produces = {MediaType.TEXT_PLAIN_VALUE})
+	public ResponseEntity<String> delete(@PathVariable("rno") Integer rno){
+		ResponseEntity<String> entity = null;
+		
+		//댓글 삭제작업
+		replyService.delete(rno);
+		
+		entity = new ResponseEntity<String>("success", HttpStatus.OK);
+		
+		return entity;
+		
 	}
 }

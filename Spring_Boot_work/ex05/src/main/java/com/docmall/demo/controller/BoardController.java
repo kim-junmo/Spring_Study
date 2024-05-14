@@ -50,6 +50,8 @@ public class BoardController {
 		//db저장 작업.
 		boardService.write(vo);
 
+		//redirect:/board/list를 사용해야되기 때문에 
+		//String을 사용함.
 		return "redirect:/board/list";
 		
 	}
@@ -85,7 +87,7 @@ public class BoardController {
 		
 		log.info("게시물 목록 데이터: " + list);
 		
-		//1)게시물 목록 10건
+		//1)게시물 목록 10건, jsp에서 참조할 목적으로 해당 코드를 사용.
 		model.addAttribute("list", list);
 		
 		int total = boardService.getTotalCount(cri);
@@ -94,14 +96,16 @@ public class BoardController {
 		log.info("페이징 기능 데이터: " + pageDTO);
 		
 		//2)페이징 기능 : 1	 2	3	4	5	6	7	8	9	10 [다음]
+		//jsp에서 참조할 목적으로 해당 코드를 사용.
 		model.addAttribute("pageMaker", pageDTO);
 		
 	}
 	
 	
 	//게시물조회, 게시물 수정
+	//파라미터로 사용하고 있는 정보를 jsp에서 참조하고 싶은 경우 @ModelAttribute("cri")를 사용.
 	@GetMapping(value = {"get","modify"})
-	public void get(Long bno, @ModelAttribute("cri")Criteria cri,Model model) {
+	public void get(Long bno, @ModelAttribute("cri") Criteria cri,Model model) {
 		
 		log.info("게시물번호:" + bno);
 				
@@ -134,7 +138,7 @@ public class BoardController {
 		rttr.addAttribute("keyword", cri.getKeyword());
 		
 		//redirect:/board/list?pageNum=2&amount=10&type=T&keyword=사과
-		 
+		 cri.getListLink(); 원래 있던 곳으로 돌아가는 코드.
 		 */
 		return "redirect:/board/list" + cri.getListLink();
 	}

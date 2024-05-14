@@ -47,7 +47,7 @@
         <tr>
             <td>
                 <button type="button" name="btnReplyModify" data-rno="{{rno}}" class="btn btn-primary btn-sm">수정</button>
-                <button type="button" name="btnReplyDelete" class="btn btn-danger btn-sm">삭제</button>
+                <button type="button" name="btnReplyDelete" data-rno="{{rno}}" class="btn btn-danger btn-sm">삭제</button>
             </td>
         </tr>
         {{/each}}
@@ -193,6 +193,16 @@
         $("#btnReplyWrite").on("click", function() {
             // console.log("댓글 버튼 클릭");
 
+            //초기화 작업(수정버튼을 눌렀을 때 기존값을 지우기 위해.)
+            $("#reply_rno").html("");
+            $("#replyer").val("");
+            $("#retext").val("");
+
+            //모달버튼 화면 보임/숨김작업 네임 속성에 btnModalReply이 있는 버튼
+            //<button name="btnModalReply"></button>
+            $("button[name='btnModalReply']").hide(); //등록, 수정, 삭제 3개 버튼 화면에서 숨김
+            $("#btnModalReplySave").show(); //다시 등록버튼 화면에서 보임.
+
             $("#replyDialog").modal('show');
         });
 
@@ -230,6 +240,7 @@
                         getPage(url);
 
                         //댓글 작성자, 내용 초기화
+                        
                         $("#replyer").val("");
                         $("#retext").val("");
 
@@ -282,6 +293,46 @@
         });
 
 
+        //3)모달 대화상자 댓글 삭제
+        $("#btnModalReplyDelete").on("click", function() {
+
+
+            //댓글 데이터를 json포맷으로 서버에 전송.
+            //1) 댓글삭제데이터를 자바스크립트의 object문법으로 표현
+            let replyData = {rno: $("#reply_rno").html()};
+
+            //2) 댓글데이터를 JSON으로 변환하여 서버에 전송
+            // console.log(JSON.stringify(replyData));
+
+            // return;
+
+            $.ajax({
+                type: 'delete', //댓글 삭제 작업은 rest API에서는 delete요청방식 사용.
+                url : '/replies/delete/' + $("#reply_rno").html(),
+                headers : {
+                    "Content-Type" : "application/json", "X-HTTP-Method-Override" : "DELETE"
+                },
+                dataType: 'text', //스프링 주소의 메서드 리턴타입
+                //data: JSON.stringify(replyData), //서버로 전송할 json데이터
+                success: function(data) {
+                    if(data == "success") {
+                        alert("댓글 삭제됨");
+                        let url = "/replies/pages/" + rno + "/" + replyPage;
+                        // console.log("url", url); 콘솔 확인 용, 코딩할 때 확인 후 다음과정으로 넘어가야한다.
+                        getPage(url);
+
+                        //댓글 번호, 댓글 작성자, 내용 초기화
+                        $("#reply_rno").html(""); // ("") 공백으로 초기화
+                        $("#replyer").val(""); // ("") 공백으로 초기화
+                        $("#retext").val(""); // ("") 공백으로 초기화
+
+                        //modal dialog 화면에서 사라짐.
+                        $("#replyDialog").modal('hide');
+                    }
+                }
+            });
+        });
+
         //댓글 목록에서 수정버튼을 클릭시 $("정적태그선택자").on("이벤트명", "동적태그선택자", function()) {
         $("div#replyList").on("click", "button[name='btnReplyModify']", function() {
             // console.log("수정버튼을 클릭");
@@ -296,6 +347,40 @@
             // console.log("rno", rno);
             // console.log("replyer", replyer);
             // console.log("retext", retext);
+
+            //모달버튼 화면 보임/숨김작업 네임 속성에 btnModalReply이 있는 버튼
+            //<button name="btnModalReply"></button>
+            $("button[name='btnModalReply']").hide(); //등록, 수정, 삭제 3개 버튼 화면에서 숨김
+            $("#btnModalReplyUpdate").show(); //다시 수정버튼 화면에서 보임.
+
+            //모달 대화상자에 값을 삽입(출력)하는 작업.
+            $("#reply_rno").html(rno); //일반태그인 <span> 태그이기 때문에 html을 사용
+            //<input>태그는 val
+            $("#replyer").val(replyer); 
+            $("#retext").val(retext);
+
+            $("#replyDialog").modal('show');
+        });
+
+                //댓글 목록에서 삭제버튼을 클릭시 $("정적태그선택자").on("이벤트명", "동적태그선택자", function()) {
+                    $("div#replyList").on("click", "button[name='btnReplyDelete']", function() {
+            // console.log("삭제버튼을 클릭");
+            //$(this)는 클릭한 삭제버튼을 관리, 
+            //parents("table#replytable") : 조상들중 table#replytable 선택자에 해당하는 태그
+            //$(this).parents() : <td>태그;
+            //$(this).parents().parents(); : <tr>태그; 참조
+            let rno = $(this).data("rno"); //<button data-rno="500">삭제</button>
+            let replyer = $(this).parents("table#replytable").find("#replyer_" + rno).html();
+            let retext = $(this).parents("table#replytable").find("#retext_" + rno).html();
+
+            // console.log("rno", rno);
+            // console.log("replyer", replyer);
+            // console.log("retext", retext);
+
+            //모달버튼 화면 보임/숨김작업 네임 속성에 btnModalReply이 있는 버튼
+            //<button name="btnModalReply"></button>
+            $("button[name='btnModalReply']").hide(); //등록, 수정, 삭제 3개 버튼 화면에서 숨김
+            $("#btnModalReplyDelete").show(); //다시 수정버튼 화면에서 보임.
 
             //모달 대화상자에 값을 삽입(출력)하는 작업.
             $("#reply_rno").html(rno); //일반태그인 <span> 태그이기 때문에 html을 사용
@@ -318,7 +403,7 @@
 
     // console.log("url", url); 콘솔 확인 용, 코딩할 때 확인 후 다음과정으로 넘어가야한다.
 
-    getPage(url);
+    getPage(url); //댓글 데이터를 가지고 오는 코드
     //댓글 목록 함수
     function getPage(url) {
 
@@ -418,7 +503,7 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-            <h5 class="modal-title" id="staticBackdropLabel">댓글 <span id="reply_rno"></span></h5>
+            <h5 class="modal-title" id="staticBackdropLabel">댓글<span id="reply_rno"></span></h5>
             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                 <span aria-hidden="true">&times;</span>
             </button>
@@ -438,9 +523,9 @@
 
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="btnModalReplySave">등록</button>
-                <button type="button" class="btn btn-primary" id="btnModalReplyUpdate">수정</button>
-                <button type="button" class="btn btn-primary" id="btnModalReplyDelete">삭제</button>
+                <button type="button" class="btn btn-primary" name="btnModalReply" id="btnModalReplySave">등록</button>
+                <button type="button" class="btn btn-primary" name="btnModalReply" id="btnModalReplyUpdate">수정</button>
+                <button type="button" class="btn btn-primary" name="btnModalReply" id="btnModalReplyDelete">삭제</button>
             </div>
         </div>
     </div>

@@ -11,10 +11,11 @@ public interface BoardMapper {
 	//메서드(); 글쓰기 저장
 	void write(BoardVO vo);
 	
-	//글 목록
+	//글 목록, 사용안함.
 	List<BoardVO> list();
 	
 	//검색조건이 추가되는 목록
+	//리스트 컬렉션을 사용하는 이유는 게시글의 총 수를 정할 수 없기 때문.
 	List<BoardVO> listwithPaging(Criteria cri);
 	
 	//검색조건이 포함된 테이블의 총 데이터 개수

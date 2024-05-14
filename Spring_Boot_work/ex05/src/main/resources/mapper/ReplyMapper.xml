@@ -58,8 +58,13 @@
 	
 	</update>
 	
-	
-	
+	<!-- <delete id="delete>의 delete는 mapper의 변수 이름과 동일해야 한다. -->
+	<delete id="delete" parameterType="Integer">
+		DELETE FROM
+			reply
+		WHERE
+			rno = #{rno}
+	</delete>
 	
 	
 	

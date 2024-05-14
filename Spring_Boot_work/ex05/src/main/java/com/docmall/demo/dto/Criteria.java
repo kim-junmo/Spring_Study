@@ -38,7 +38,8 @@ public class Criteria {
 	//아래 메서드명은 getter메서드 이름 규칙대로 작성해야 한다. get(접두사) + typeArr(필드) = getTypeArr 메서드명
 	//클라이언트로부터 검색정보가 (제목 또는 작성자 또는 내용)으로 선택되어 지면 type필드 TWC 제목 또는 작성자 또는 내용
 	//type.split("")이 사용이 되면 "TWC".split("")이 되고 "T" "W" "C"의 배열 구조가 됨. 
-	//
+	//getTypeArr(): BoardMapper.xml 파일에서 사용한다. 
+	//typeArr(필드)이름으로 참조하지만, 실제로는 아래 getter메서드가 내부적으로 호출된다.
 	public String[] getTypeArr() {
 		return type == null ? new String[] {} : type.split("");
 	}

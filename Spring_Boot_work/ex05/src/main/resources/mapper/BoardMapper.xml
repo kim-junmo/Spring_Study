@@ -29,6 +29,11 @@
 	검색조건 1)목록 2) 총데이터 개수 공통사항으로 사용될 때 복합적으로 사용이 필요할때는 sql로 사용해야 한다. 
 	foreach : 검색 조건에 or이 붙어있는 3개 때문에 사용되어야 한다. 반복을 하는 역활이 필요하기 때문.
 	검색정보가 (제목 또는 작성자 또는 내용)으로 선택, "T" "W" "C"
+	(
+  	 OR title like '%' || '검색어' || '%'
+  	 OR writer like '%' || '검색어' || '%'
+  	 OR content like '%' || '검색어' || '%'
+	)AND
 	-->
 	<sql id="criteria">
 		<trim prefix="(" suffix=") AND" prefixOverrides="OR">
@@ -82,7 +87,7 @@
 			board
 		WHERE
 			<include refid="criteria"></include>
-		bno > 0
+		bno > 0 <!-- 없어도 되지만 where절에 검색어가 있으면 오류가 발생하기 때문에 넣음. -->
 	</select>
 	
 	<!--조회수 증가 -->

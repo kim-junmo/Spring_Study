@@ -23,6 +23,8 @@ public interface ReplyMapper {
 	void insert(ReplyVO vo);
 	
 	void update(ReplyVO vo);
+	
+	void delete(Integer rno);
 }
 
 
