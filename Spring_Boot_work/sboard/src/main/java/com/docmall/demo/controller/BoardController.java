@@ -33,7 +33,7 @@ public class BoardController {
 	public String write(BoardVO vo) {
 		log.info("게시판 입력데이터 " + vo);
 		
-		return red
+		return "redirct:/list";
 	}
 	
 	//게시판 조회
