@@ -36,7 +36,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j //log 객체지원
 @RequiredArgsConstructor //final 필드를 이용하여 생상자를 생성한다. 그리고 그 생성자가 주입받는다
-@RestController
+@RestController //@controller + @ResponsBody, @RestController를 사용하는 클래스의 메서드들은 모두 @ResponsBody이 적용되어 있다.
 @RequestMapping("/replies/*")
 public class ReplyController {
 

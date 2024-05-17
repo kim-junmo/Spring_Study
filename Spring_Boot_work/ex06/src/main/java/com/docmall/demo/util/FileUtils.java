@@ -13,17 +13,19 @@ import javax.imageio.ImageIO;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Component;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import net.coobird.thumbnailator.Thumbnails;
 
+@Component //스프링에서 클래스를 자동 관리해준다. 
 public class FileUtils {
 
 	//날짜별로 업로드 날짜에 맞게 폴더를 생성.
 	//기능: 현재 폴더를 운영체제 별 맞게 문자열로 반환하는 기능.
 	public static String getDateFolder() {
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); //날짜포멧형식
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd"); //날짜포멧 패턴을 만들때 사용하는 형식
 		Date date = new Date(); //오늘 날짜 정보
 		
 		String str = sdf.format(date); //"2024-05-16" 폴더명 문자열이 str에 저장됨.
@@ -57,16 +59,19 @@ public class FileUtils {
 		*/
 		
 		//예> "C:/dev/upload/pds"(고정) + "2024/05/16"(동적(날짜가 변경되면 새로 폴더가 만들어진다))
+		//업로드 할 폴더 File객체 
 		File file = new File(uploadFolder, dateFolder);
 		
 		//"2024/05/16"폴더가 존재하지 않으면 폴더 생성하자.
+		//새로운 날짜에 첫번째 파일 업로드가 진행이 되면 폴더가 생성되고, 
+		//두번째 파일 업로드 부터는 폴더가 생성되지 않게 된다.
 		if(file.exists() == false) {
-			file.mkdirs();
+			file.mkdirs(); // "C:/dev/upload/pds2024/05/16" 개발할때는 mkdir을 사용하지 않고 mkdirs를 사용함.
 		}
 		
 		//클라이언트에서 보낸 파일명
 		String ClientFileName = uploadFile.getOriginalFilename(); //abc.png
-		UUID uuid = UUID.randomUUID(); // 2f48f241-9d64-4d16-bf56-70b9d4e0e79a
+		UUID uuid = UUID.randomUUID(); // 2f48f241-9d64-4d16-bf56-70b9d4e0e79a (중복성은 있지만 희박함)
 		
 		//2f48f241-9d64-4d16-bf56-70b9d4e0e79a_abc.png
 		realUploadFileName = uuid.toString() + "_" + ClientFileName;
@@ -80,9 +85,12 @@ public class FileUtils {
 			//원본파일에서 해상도 크기를 줄여 섬네일 이미지 생성하기
 			if(checkImageType(saveFile)) {
 				//Thumnail파일명 : s_2f48f241-9d64-4d16-bf56-70b9d4e0e79a_abc.png 생성
+				//thumnailFile객체 : "C:/dev/upload/pds2024/05/16" + "s_2f48f241-9d64-4d16-bf56-70b9d4e0e79a_abc.png"
 				File thumnailFile = new File(file, "s_" + realUploadFileName);
 				
+				//saveFile 객체는 이미 업로드 된 파일
 				BufferedImage bo_img = ImageIO.read(saveFile);
+				//이미지 파일을 줄인다.
 				double ratio = 3;
 				int width = (int) (bo_img.getWidth() / ratio);
 				int heigth = (int) (bo_img.getHeight() / ratio);
@@ -100,7 +108,7 @@ public class FileUtils {
 	}
 
 	//기능: 업로드 파일의 MINE타입 확인, 즉 이미지파일인지 일반파일 여부를 체크
-	private static boolean checkImageType(File saveFile) {
+	public static boolean checkImageType(File saveFile) {
 
 		boolean isImageType = false;
 		
@@ -119,11 +127,12 @@ public class FileUtils {
 	}
 	
 	//기능: 이미지 파일을 웹브라우저 화면에 보이는 작업. 매핑주소를 요청해서 바이트별로 가저오게 된다.
-	// <img src="abc.gif"> <img src="매핑주소">
+	// <img src="abc.gif"> <img src="매핑주소"> 매핑 주소를 통한 서버측에서 받아오는 바이트 배열을 이용하여 브라우저가 이미지를 표시한다.
 	/*
 	 String uploadPath : 서버 업로드 폴더 예)"C:/dev/upload/pds"
 	 String fileName: 날짜 폴더명까지 포함된 이미지 파일명
 	 */
+	//파일 업로드가 되는 폴더가 프로젝트 외부에 존재하여, 보안적인 이슈가 있으므로, 업로드 파일들을 바이트배열로 읽어서 클라이언트로 보낸다.
 	public static ResponseEntity<byte[]>getFile(String uploadPath, String fileName) throws Exception { //리턴타입이 바이트 배열이다.
 		ResponseEntity<byte[]>entity = null;
 		
@@ -145,16 +154,21 @@ public class FileUtils {
 	/*
 	 String uploadPath : 서버 업로드 폴더 경로
 	 String folderName : 날짜폴더명
-	 String fileName : 파일명
+	 String fileName : 파일명 (날짜 폴더명 포함)
 	 */
-	public static void delete(String uploadPath, String folderName, String fileName) {
+	public static void delete(String uploadPath, String fileName, String type) {
 		
 		//1) 원본파일 삭제 예 : "C:\\dev\\upload\\pds" "2024\\05\\16" 2f48f241-9d64-4d16-bf56-70b9d4e0e79a_abc.png
-		File file1 = new File((uploadPath + folderName + "\\" + fileName).replace('\\', File.separatorChar));
+		File file1 = new File((uploadPath + "\\" + fileName).replace('\\', File.separatorChar));
 		if(file1.exists()) file1.delete();
 		
+		if(type.equals("image")) {
 		//2)thumnail 섬네일 파일 삭제
-		File file2 = new File((uploadPath + folderName + "\\" + "_s" + fileName).replace('\\', File.separatorChar));
+		File file2 = new File((uploadPath + "\\" + "_s" + fileName).replace('\\', File.separatorChar));
 		if(file2.exists()) file2.delete();
+		}
 	}
+
+
+		
 }

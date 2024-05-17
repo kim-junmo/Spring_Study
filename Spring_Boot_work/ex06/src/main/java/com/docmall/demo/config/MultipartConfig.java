@@ -16,7 +16,9 @@ import jakarta.servlet.MultipartConfigElement;
 @Configuration //설정파일을 만들기 위한 어노테이션 or Bean을 등록하기 위한 어노테이션
 public class MultipartConfig {
 
+	//스프링에서 자동으로 관리가 된다. 리턴타입 multipartResolver bean 등록 및 관리.
 	//new StandardServletMultipartResolver(); 객체 생성
+	//@Bean : 라이브러리에서 제공하는 클래스를 스프링에서 관리함. 
 	@Bean //스프링 시스템에서 객체를 관리하고 싶을 때 bean어노테이션을 사용하면 스프링에서 자동으로 bean이라는 성격으로 관리가 된다. 
 	public MultipartResolver multipartResolver() {
 		return new StandardServletMultipartResolver();
