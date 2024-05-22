@@ -58,7 +58,7 @@
                     	</c:forEach>
                     </tbody>
 				</table>
-				<form id="actionForm" action="/board/list" method = "get">
+				<form id="actionForm" action="/board/list" method="get">
 					<input type="hidden" name="bno" value="${boardVO.bno }">
 					<input type="hidden" name="type" value="${pageMaker.cri.type}">
 					<input type="hidden" name="keyword" value="${pageMaker.cri.keyword}">

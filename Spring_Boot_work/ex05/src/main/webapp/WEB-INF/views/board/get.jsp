@@ -36,6 +36,7 @@
 
 <!-- 2) Handlebar Trmplate -->
 <script id="reply-template" type="text/x-handlebars-template">
+
     <table id="replytable">
         {{#each .}} <!--데이터가 복수이면 each를 사용한다.-->
         <tr>

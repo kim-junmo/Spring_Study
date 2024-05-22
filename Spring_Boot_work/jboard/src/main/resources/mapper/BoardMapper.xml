@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.docmall.demo.mapper.BoardMapper">
+
+	<insert id="write" parameterType="com.docmall.demo.domain.BoardVO">
+		
+		INSERT INTO
+			board(bno, title, content, writer)
+		VALUES
+			(SEQ_board.NEXTVAL, #{title}, #{content}, #{writer})
+			
+	</insert>
+	
+	
+	
+	<select id="list" resultType="com.docmall.demo.domain.BoardVO">
+	
+	SELECT  
+		bno, title, content, writer, regdate, updatedate, viewcount
+	FROM
+		BOARD
+	ORDER BY
+		bno DESC
+	
+	</select>
+	
+	<sql id="criteria">
+		<trim prefix="(" suffix=") AND" prefixOverrides="OR">
+			<foreach collection="typeArr" item="type">
+				<trim prefix="OR">
+					<choose>
+						<when test="type == 'T'.toString()">
+						title like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'W'.toString()">
+						writer like '%' || #{keyword} || '%'
+						</when>
+						<when test="type == 'C'.toString()">
+						content like '%' || #{keyword} || '%'
+						</when>
+					</choose>
+				</trim>
+			</foreach>
+		</trim>
+	</sql>
+	
+	<!-- 검색조건 추가 -->
+	<select id="listwithPaging" resultType="com.docmall.demo.domain.BoardVO" parameterType="com.docmall.demo.dto.Criteria">
+	
+	SELECT
+		bno, title, content, writer, regdate, updatedate, viewcount
+	FROM (
+			SELECT /*+ INDEX_DESC(board PK_BOARD)*/
+				ROWNUM AS RN, bno, title, content, writer, regdate, updatedate, viewcount
+			FROM
+				board
+			WHERE
+				<include refid="criteria"></include>
+			<![CDATA[
+				ROWNUM <= (#{pageNum} * #{amount})
+			]]>
+		)
+	WHERE
+		RN > (#{pageNum} -1) * #{amount}
+	</select>
+	
+	<select id="getTotalCount" resultType="int">
+	SELECT
+		COUNT(*)
+	FROM
+		board
+	WHERE
+		<include refid="criteria"></include>
+		bno > 0
+	</select>
+	
+	
+	<update id="readCount" parameterType="Long">
+		update
+			board
+		set
+			viewcount = viewcount + 1
+		where
+			bno = #{bno}
+	</update>
+	
+	
+	<update id="modify" parameterType="com.docmall.demo.domain.BoardVO">
+	
+	UPDATE 
+		BOARD
+	SET
+		title = #{title}, content = #{content}, updatedate = sysdate
+	WHERE 
+		bno = #{bno}
+		
+	</update>
+	
+	<select id="get" resultType="com.docmall.demo.domain.BoardVO" parameterType="Long">
+		SELECT
+			bno, title, content, writer, regdate, updatedate, viewcount
+		FROM
+			board
+		WHERE
+			bno = #{bno}
+	</select>
+		
+	<delete id="delete" parameterType="com.docmall.demo.domain.BoardVO">
+	
+	DELETE FROM
+		BOARD
+	WHERE
+		bno = #{bno}
+	
+	</delete>
+</mapper>

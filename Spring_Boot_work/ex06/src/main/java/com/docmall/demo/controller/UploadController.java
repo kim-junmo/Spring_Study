@@ -2,6 +2,8 @@ package com.docmall.demo.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -67,7 +69,7 @@ public class UploadController {
 		}
 	}
 	
-	//업로드 방식 2)ajax를 이용한 방식.
+	//업로드 방식 2)ajax를 이용한 방식.(제이쿼리에서 제공해주는)
 	@GetMapping("uploadAjax")
 	public void uploadAjax() {
 		
@@ -76,6 +78,7 @@ public class UploadController {
 	//리턴값은 <List<AttachFileDTO>> -> JSON으로 변환되어 클라이언트로 전송된다.(jackson-databind라이브러리 작업)
 	@ResponseBody //ajax요청받는 매핑주소는 이 어노테이션을 반드식 달아야 한다.
 	@PostMapping(value = "uploadAjaxAction", produces = {MediaType.APPLICATION_JSON_UTF8_VALUE})
+	//uploadFile은 uploadAjax에 formData.append("uploadFile", files[i])에서 uploadFile와 동일해야 함.
 	public ResponseEntity<List<AttachFileDTO>> uploadAjaxAction(MultipartFile[] uploadFile) {
 		
 		//전체적인 리턴타입 : ResponseEntity<List<AttachFileDTO>> entity = null;
@@ -85,7 +88,8 @@ public class UploadController {
 		//업로드한 파일 정보 목록 =list
 		List<AttachFileDTO> list = new ArrayList<>();
 		
-		String uploadDateFolder = fileUtils.getDateFolder(); //날짜 폴더를 얻어옴.
+		//업로드 하는 날짜를 이용한 폴더를 얻어옴.
+		String uploadDateFolder = fileUtils.getDateFolder(); 
 		
 		for(MultipartFile multipartFile : uploadFile) {
 			AttachFileDTO attachFileDTO = new AttachFileDTO();
@@ -135,14 +139,27 @@ public class UploadController {
 	//파일 삭제
 	@PostMapping(value = "daleteFile")
 	@ResponseBody
+	//날짜 : dateFolderName, fileName : 파일명
 	public ResponseEntity<String> daleteFile(String dateFolderName, String fileName, String type) {
 		
+		try {
+			//클라이언트에서 \문자 데이터를 인코딩으로 받아, 서버에서는 디코딩처리 함.
+			//2024%5C05%5C20 → 2024\05\20→
+			dateFolderName = URLDecoder.decode(dateFolderName, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		log.info("dateFolderName: " + dateFolderName);
 		log.info("fileName: " + fileName);
 		log.info("type: " + type);
 		
+		
+		
 		ResponseEntity<String> entity = null;
 		
-		fileUtils.delete(uploadFolder, fileName, type);
+		fileUtils.delete(uploadFolder, dateFolderName, fileName, type);
 		
 		entity = new ResponseEntity<String>("success", HttpStatus.OK);
 		return entity;

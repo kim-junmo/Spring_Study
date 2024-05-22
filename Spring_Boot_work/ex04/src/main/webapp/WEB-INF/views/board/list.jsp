@@ -48,11 +48,11 @@
                         <td>${boardVO.bno }</td>
                         <td><a href="/board/get?bno=${boardVO.bno }&type=${pageMaker.cri.type}&keyword=${pageMaker.cri.keyword}&pageNum=${pageMaker.cri.pageNum}&amount=${pageMaker.cri.amount}">${boardVO.title }</a></td>
                         <td>${boardVO.writer }</td>                
-                        <td>
-                        <fmt:formatDate value="${boardVO.regdate }" pattern="yyyy-MM-dd" /></td>
+                        <td><fmt:formatDate value="${boardVO.regdate }" pattern="yyyy-MM-dd" /></td>
                         <td>${boardVO.viewcount }</td>
                     </tr>
                     </c:forEach>
+                    
                     </tbody>
 					</table>
 					</div>
@@ -93,7 +93,7 @@
 		                /board/list 매핑 주소 요청 시 스프링에서 메서드와 파라미터가 Criteria cri로 되어 있기 때문에
 		                클라이언트에서 pageNum, amount 두 파라미터로 정보를 보내야 한다.
 		                -->
-		                <a class="page-link" href="/board/list?type=${pageMaker.cri.type }&keyword=${pageMaker.cri.keyword }&pageNum=${page }&amount=${pageMaker.cri.amount}">${page }</a></li>
+		                <a class="page-link" href="/board/list?type=${pageMaker.cri.type }&keyword=${pageMaker.cri.keyword }&pageNum=${pageMaker.cri.pageNum }&amount=${pageMaker.cri.amount}">${page }</a></li>
 		                </c:forEach>
 		                
 		                <c:if test="${pageMaker.next }">
