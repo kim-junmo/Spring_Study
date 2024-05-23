@@ -17,4 +17,17 @@ public class UserInfoServiceImpl implements UserInfoService {
 		this.userInfoMapper = userInfoMapper;
 	}
 	*/
+	
+	@Override
+	public String idCheck(String u_id) {
+		// TODO Auto-generated method stub
+		return userInfoMapper.idCheck(u_id);
+	}
+	
+	
+	
+	
+	
+	
+	
 }

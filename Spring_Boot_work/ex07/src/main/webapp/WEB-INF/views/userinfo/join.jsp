@@ -15,7 +15,7 @@
 	<!-- 안에 부트스트랩, 제이쿼리 파일이 있기 때문에 아래 사용된 부트스트랩을 사용하기 위해 상단에 넣어야 함. -->
     <%@ include file="/WEB-INF/views/comm/config.jsp" %>
 
-   
+  
 
 
     <!-- Favicons -->
@@ -73,9 +73,13 @@
                 <div class="col-sm-4">
                   <input type="text" class="form-control" id="u_id" name="u_id" placeholder="U_ID">
               </div>
+
+              <!--아이디 중복체크 칸-->
               <div class="col-sm-4">
-                <button type="button" class="btn btn-outline-primary">ID CHECK</button>
+                <button type="button" class="btn btn-outline-primary" id="btnIDCheck">ID CHECK</button>
               </div>
+              <span class="col-sm-2" id="idCheckMsg" style="color: darkgray;"></span>
+
               </div>
               <div class="form-group row">
                 <label for="u_pwd" class="col-sm-2 col-form-label">U_PWD</label>
@@ -99,7 +103,7 @@
                   <input type="text" class="form-control" id="u_email" name="u_email" placeholder="U_Email">
               </div>
               <div class="col-sm-2">
-                <button type="button" class="btn btn-outline-primary">메일인증요청</button>
+                <button type="button" class="btn btn-outline-primary" id="btnMailAuthcode">메일인증요청</button>
               </div>
                 <div class="col-sm-3">
                   <input type="text" class="form-control" id="u_authcode" name="u_authcode" placeholder="인증코드 입력하세요.">
@@ -152,7 +156,7 @@
 
 <%@ include file="/WEB-INF/views/comm/footer.jsp" %>
 
-  </body>
+
   <!-- iOS에서는 position:fixed 버그가 있음, 적용하는 사이트에 맞게 position:absolute 등을 이용하여 top,left값 조정 필요 -->
 <div id="layer" style="display:none;position:fixed;overflow:hidden;z-index:1;-webkit-overflow-scrolling:touch;">
   <img src="//t1.daumcdn.net/postcode/resource/images/close.png" id="btnCloseLayer" style="cursor:pointer;position:absolute;right:-3px;top:-3px;z-index:1" onclick="closeDaumPostcode()" alt="닫기 버튼">
@@ -246,5 +250,75 @@
           element_layer.style.top = (((window.innerHeight || document.documentElement.clientHeight) - height)/2 - borderWidth) + 'px';
       }
   </script>
+
+<script>
+  //아이디 중복체크를 하기 위한 ajax 구문.
+  $(document).ready(function() {
+
+    //사용자가 아이디 중복체크 기능을 사용했는지 유무를 확인하는 목적.
+    //let useIDCheck = false; : 자바스트 유효성때문에 작성.
+    let useIDCheck = false; 
+
+    $("#btnIDCheck").on("click", function() {
+      
+      //val() : 아이디 체크박스의 값을 읽어옴.
+      if($("#u_id").val() == "") { 
+        alert("아이디를 입력하세요.");
+        $("#u_id").focus();
+        return;
+      }
+
+      //값을 스프링으로 보내는 작업.
+      //u_id : 컨트롤러에서 가지고 왔음. 
+      //dataType: 'text' : 컨트롤러 작업에서 리턴타입이 String이기 때문.
+      $.ajax({
+        url: '/userinfo/idCheck',
+        type: 'get',
+        data: {u_id : $("#u_id").val()},
+        dataType: 'text', //text, html, xml, json 값이 사용됨.
+        success: function(result) { //result: 컨트롤러의 iduse의 값이 들어온다.
+          if(result == "yes") { //컨트롤러의 idUse = "yes";와 일치해야 한다.
+            alert("아이디 사용 가능합니다.");
+            $("#idCheckMsg").html("사용가능")
+          }else{
+            alert("아이디 사용 불가능합니다.");
+            $("#idCheckMsg").html("사용불가능")
+            $("#u_id").val(""); // "" : 입력한 아이디가 삭제가 된다.
+            $("#u_id").focus();
+          }
+
+        }
+      });
+
+    });
+
+    //메일 인증을 위한 작업.
+    $("#btnMailAuthcode").on("click", function() {
+
+      if($("#u_email").val() == "") {
+        alert("메일을 입력하세요.");
+        $("#u_email").focus();
+        return;
+      }
+
+      $.ajax({
+        url: '/email/authcode',
+        type: 'get',
+        data: {receiverMail : $("#u_email").val()}, //receiverMail: 받는사람이기 때문에 수신자 메일주소를 넣어야한다.
+        dataType: 'text', //컨트롤러에 리턴타입이 success가 텍스트이기 때문.
+        success: function(result) {
+          if(result == "success") {
+            alert("메일로 인증코드가 발급되었습니다.")
+          }
+        }
+      });
+    });
+  });
+
+</script>
+
+
+
+</body>
 
 </html>
